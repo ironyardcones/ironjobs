@@ -7,5 +7,18 @@
     "start": "node ."
   },
   "author": "TIY DC Cohort",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ironyardcones/ironjobs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ironyardcones/ironjobs/issues"
+  },
+  "homepage": "https://github.com/ironyardcones/ironjobs#readme"
 }
