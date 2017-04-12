@@ -1,0 +1,62 @@
+const jobsRouter = require('express').Router();
+
+let allJobs = [
+  {
+    'id': '53248395452310448',          // assigned by MongoDB
+    'company': 'The Iron Yard',     // provided on creation by the front end (required)
+    'link': 'link here',        // provided on creation by the front end (required, either a URL or email address)
+    'notes': 'some notes',       // provided on creation by the front end (optional)
+    'createTime': Date.now()     // Created by the back end (YOU)
+  },
+
+  {
+    'id': '29435436523425',          // assigned by MongoDB
+    'company': 'Jordan Kasper',     // provided on creation by the front end (required)
+    'link': 'link goes here',        // provided on creation by the front end (required, either a URL or email address)
+    'notes': 'some notes',       // provided on creation by the front end (optional)
+    'createTime': Date.now()     // Created by the back end (YOU)
+  }
+];
+
+/**
+ * getAllJobs creates a response object that contains a JSON array of each job object containing company name, link, and notes.
+ * @type {Array} ???
+ */
+jobsRouter.get('/', function getAllJobs(req, res, next) {
+  allJobs.forEach(function (job) {
+    console.log(job.company, job.link, job.notes);
+  });
+
+    let jobsInfo = [];
+    allJobs.forEach(function (job) {
+      jobsInfo.push({
+        company: job.company,
+        link: job.link,
+        notes: job.notes
+      });
+    });
+
+    res.json(jobsInfo);
+});
+
+/** Adds a job to the database
+* @param {Object} req    Must have a body like: {'company': String, 'link': String} may include notes
+* @param {Object} res    Contains various information including status code, json representation of the body
+*/
+function addAJob(req, res, next) {
+  console.log('incoming data for POST', req.body);
+
+  if(!req.body.company || !req.body.link) {
+    let err = new Error('You must provide a link and company');
+    err.status = 400;
+    return next(err);
+  }
+
+  allJobs.push(req.body);
+
+  res.json({ message: 'I am adding a job!', theJobWeAdded: req.body });
+}
+
+jobsRouter.post('/', addAJob);
+
+module.exports = jobsRouter;

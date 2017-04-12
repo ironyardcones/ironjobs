@@ -2,9 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 let app = express();
+app.use(express.static('../client/public/')); //we need to look at this tomorrow
+app.use(bodyParser.json());
 
-console.log('Hello World');
-
+app.use('/api/jobs', require('./routes/jobs.route.js'));
 
 app.listen(4000, function doSomethingOnceServerIsUp(err) {
   if(err) {
