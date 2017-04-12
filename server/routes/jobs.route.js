@@ -19,6 +19,26 @@ let allJobs = [
 ];
 
 /**
+ * getAJob finds a particular job in the database and assigns it to the response provided by the api
+ * @type {Boolean}
+ */
+jobsRouter.get('/:id', function getAJob(req, res, next) {
+  let thisID = req.params.id;
+  let theJob = {};
+  let err = new Error('Could not find matching job');
+  err.status = 404;
+  allJobs.forEach(function (job) {
+    if (job.id === thisID) {
+      theJob = job;
+    } else {
+      return next(err);
+    }
+  });
+  res.send('You found a job with the id: ' + thisID + theJob);
+  res.json(theJob);
+});
+
+/**
  * getAllJobs creates a response object that contains a JSON array of each job object containing company name, link, and notes.
  * @type {Array} ???
  */
@@ -56,6 +76,7 @@ function addAJob(req, res, next) {
 
   res.json({ message: 'I am adding a job!', theJobWeAdded: req.body });
 }
+
 
 jobsRouter.post('/', addAJob);
 
