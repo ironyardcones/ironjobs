@@ -1,6 +1,13 @@
 const jobsRouter = require('express').Router();
 const Job = require('../models/Job.model.js');
 
+/**
+ * [findMatchingJobs description]
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
 jobsRouter.get('/find', function findMatchingJobs(req, res, next) {
   Job.find({
     company: {$regex: req.query.search, $options: 'i'}
@@ -9,37 +16,33 @@ jobsRouter.get('/find', function findMatchingJobs(req, res, next) {
     res.json(data);
   })
   .catch(function handleIssues(err) {
-    let err = new Error('Jobs is not an array');
-    err.status = 500;
-    return next(err);
+    console.error(err);
+    let ourError = new Error('Error finding the job matching: ', req.query.search);
+    ourError.status = 422;
+    return next(ourError);
   });
 });
-
-
 
 /**
 * getAJob finds a particular job in the database and assigns it to the response provided by the api
 * @type {Boolean}
 */
 jobsRouter.get('/:id', function getAJob(req, res, next) {
-  Job.findByID(req.params.id);
-
-/////////////////////////
-
-
-  let thisID = req.params.id;
-  let theJob = {};
-  let err = new Error('Could not find matching job');
-  err.status = 404;
-  allJobs.forEach(function (job) {
-    if (job.id === thisID) {
-      theJob = job;
-    } else {
+  Job.findByID(req.params.id)
+  .then(function sendBackTheJob(job) {
+    if (!job) {
+      let err = new Error('job not found');
+      err.status = 404;
       return next(err);
     }
+    res.json(job);
+  })
+  .catch(function handleIssues(err) {
+    console.error(err);
+    let ourError = new Error('There was an error finding the job matching id: ', req.params.id);
+    ourError.status = err.status;
+    return next(ourError);
   });
-  res.send('You found a job with the id: ' + thisID + theJob);
-  res.json(theJob);
 });
 
 /**
@@ -58,7 +61,8 @@ jobsRouter.get('/', function getAllJobs(req, res, next) {
       return {id: job.id, company: job.company, link: job.link};
     }));
   })
-  .catch(function handleIssues() {
+  .catch(function handleIssues(err) {
+    console.error(err);
     let ourError = new Error('Unable to retieve jobs');
     ourError.status = 500;
     return next(ourError);
@@ -88,6 +92,7 @@ function addAJob(req, res, next) {
     res.json(data);
   })
   .catch(function handleIssues(err) {
+    console.error(err);
     let ourError = new Error('unable to save job');
     ourError.status = 422;
     next(ourError);

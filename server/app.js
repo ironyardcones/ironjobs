@@ -12,6 +12,11 @@ app.use('/api/jobs', require('./routes/jobs.route.js'));
 
 app.use(require('./middleware/error-handler.middleware.js'));
 
+/**
+ * [doSomethingOnceServerIsUp description]
+ * @param  {[type]} err [description]
+ * @return {[type]}     [description]
+ */
 app.listen(4000, function doSomethingOnceServerIsUp(err) {
   if(err) {
     console.error('The server could not be started:', err.message);
