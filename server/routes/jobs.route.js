@@ -1,28 +1,32 @@
 const jobsRouter = require('express').Router();
+const Job = require('../models/Job.model.js');
 
-let allJobs = [
-  {
-    'id': '53248395452310448',          // assigned by MongoDB
-    'company': 'The Iron Yard',     // provided on creation by the front end (required)
-    'link': 'link here',        // provided on creation by the front end (required, either a URL or email address)
-    'notes': 'some notes',       // provided on creation by the front end (optional)
-    'createTime': Date.now()     // Created by the back end (YOU)
-  },
+jobsRouter.get('/find', function findMatchingJobs(req, res, next) {
+  Job.find({
+    company: {$regex: req.query.search, $options: 'i'}
+  })
+  .then(function sendBackMatchingJobs(data) {
+    res.json(data);
+  })
+  .catch(function handleIssues(err) {
+    let err = new Error('Jobs is not an array');
+    err.status = 500;
+    return next(err);
+  });
+});
 
-  {
-    'id': '29435436523425',          // assigned by MongoDB
-    'company': 'Jordan Kasper',     // provided on creation by the front end (required)
-    'link': 'link goes here',        // provided on creation by the front end (required, either a URL or email address)
-    'notes': 'some notes',       // provided on creation by the front end (optional)
-    'createTime': Date.now()     // Created by the back end (YOU)
-  }
-];
+
 
 /**
- * getAJob finds a particular job in the database and assigns it to the response provided by the api
- * @type {Boolean}
- */
+* getAJob finds a particular job in the database and assigns it to the response provided by the api
+* @type {Boolean}
+*/
 jobsRouter.get('/:id', function getAJob(req, res, next) {
+  Job.findByID(req.params.id);
+
+/////////////////////////
+
+
   let thisID = req.params.id;
   let theJob = {};
   let err = new Error('Could not find matching job');
@@ -39,31 +43,26 @@ jobsRouter.get('/:id', function getAJob(req, res, next) {
 });
 
 /**
- * getAllJobs creates a response object that contains a JSON array of each job object containing company name, link, and notes.
- * @type {Array} ???
- */
+* getAllJobs creates a response object that contains a JSON array of each job object containing company name, link, and notes.
+* @type {Array} ???
+*/
 jobsRouter.get('/', function getAllJobs(req, res, next) {
-
-  if (!Array.isArray(jobs)) {
-    let err = new Error('Jobs is not an array');
-    err.status = 500;
-    return next(err);
-  }
-
-  allJobs.forEach(function (job) {
-    console.log(job.company, job.link, job.notes); //supposed to be id, company, and link?
+  Job.find()
+  .then(function sendBackAllTheJobs(allJobs) {
+    if (!Array.isArray(allJobs)) {
+      let err = new Error('Jobs is not an array');
+      err.status = 500;
+      return next(err);
+    }
+    res.json(allJobs.map(function(job) {
+      return {id: job.id, company: job.company, link: job.link};
+    }));
+  })
+  .catch(function handleIssues() {
+    let ourError = new Error('Unable to retieve jobs');
+    ourError.status = 500;
+    return next(ourError);
   });
-
-    let jobsInfo = [];
-    allJobs.forEach(function (job) {  //supposed to be id, company, and link?
-      jobsInfo.push({
-        company: job.company,
-        link: job.link,
-        notes: job.notes
-      });
-    });
-
-    res.json(jobsInfo);
 });
 
 /** Adds a job to the database
@@ -81,14 +80,19 @@ function addAJob(req, res, next) {
     return next(err);
   }
 
-  // req.body.createTime = Date.now();
-  // req.body.id = JSON.stringify(Date.now());
-  
-  allJobs.push(req.body);
+  let theJobCreated = new Job({company: req.body.company, link: req.body.link, notes: req.body.notes, createTime: Date.now()});
 
-  res.json({ message: 'I am adding a job!', theJobWeAdded: req.body });
+  theJobCreated.save()
+  .then(function sendBackTheResponse(data) {
+    console.log('data of new job added', data);
+    res.json(data);
+  })
+  .catch(function handleIssues(err) {
+    let ourError = new Error('unable to save job');
+    ourError.status = 422;
+    next(ourError);
+  });
 }
-
 
 jobsRouter.post('/', addAJob);
 
