@@ -49,12 +49,13 @@ jobsRouter.get('/', function getAllJobs(req, res, next) {
     err.status = 500;
     return next(err);
   }
+
   allJobs.forEach(function (job) {
-    console.log(job.company, job.link, job.notes);
+    console.log(job.company, job.link, job.notes); //supposed to be id, company, and link?
   });
 
     let jobsInfo = [];
-    allJobs.forEach(function (job) {
+    allJobs.forEach(function (job) {  //supposed to be id, company, and link?
       jobsInfo.push({
         company: job.company,
         link: job.link,
@@ -68,6 +69,8 @@ jobsRouter.get('/', function getAllJobs(req, res, next) {
 /** Adds a job to the database
 * @param {Object} req    Must have a body like: {'company': String, 'link': String} may include notes
 * @param {Object} res    Contains various information including status code, json representation of the body
+* @param {Function} next
+* @return {void}
 */
 function addAJob(req, res, next) {
   console.log('incoming data for POST', req.body);
@@ -78,6 +81,9 @@ function addAJob(req, res, next) {
     return next(err);
   }
 
+  // req.body.createTime = Date.now();
+  // req.body.id = JSON.stringify(Date.now());
+  
   allJobs.push(req.body);
 
   res.json({ message: 'I am adding a job!', theJobWeAdded: req.body });
