@@ -18,3 +18,4 @@ in order to build the `style.css` file!
 ## Contributors:
 
 - Brian Fiala and Jennifer Oakes
+-The Iron Yard, Washington, D.C. 2017
