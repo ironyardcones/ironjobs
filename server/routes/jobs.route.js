@@ -43,6 +43,12 @@ jobsRouter.get('/:id', function getAJob(req, res, next) {
  * @type {Array} ???
  */
 jobsRouter.get('/', function getAllJobs(req, res, next) {
+
+  if (!Array.isArray(jobs)) {
+    let err = new Error('Jobs is not an array');
+    err.status = 500;
+    return next(err);
+  }
   allJobs.forEach(function (job) {
     console.log(job.company, job.link, job.notes);
   });
