@@ -7,6 +7,8 @@ app.use(bodyParser.json());
 
 app.use('/api/jobs', require('./routes/jobs.route.js'));
 
+app.use(require('./middleware/error-handler.middleware.js'))
+
 app.listen(4000, function doSomethingOnceServerIsUp(err) {
   if(err) {
     console.error('The server could not be started:', err.message);
