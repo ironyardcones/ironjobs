@@ -1,9 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+require('./database-setup.js');
+
 let app = express();
 app.use(express.static(__dirname + '/../client/public/')); //we need to look at this tomorrow??
 app.use(bodyParser.json());
+
 
 app.use('/api/jobs', require('./routes/jobs.route.js'));
 
