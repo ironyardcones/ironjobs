@@ -2,25 +2,14 @@ const jobsRouter = require('express').Router();
 const Job = require('../models/Job.model.js');
 
 /**
- * [findMatchingJobs description]
- * @param  {[type]}   req  [description]
- * @param  {[type]}   res  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
- */
+* [findMatchingJobs description]
+* @param  {[type]}   req  [description]
+* @param  {[type]}   res  [description]
+* @param  {Function} next [description]
+* @return {[type]}        [description]
+*/
 jobsRouter.get('/find', function findMatchingJobs(req, res, next) {
-  Job.find({
-    company: {$regex: req.query.search, $options: 'i'}
-  })
-  .then(function sendBackMatchingJobs(data) {
-    res.json(data);
-  })
-  .catch(function handleIssues(err) {
-    console.error(err);
-    let ourError = new Error('Error finding the job matching: ', req.query.search);
-    ourError.status = 422;
-    return next(ourError);
-  });
+
 });
 
 /**
@@ -50,23 +39,41 @@ jobsRouter.get('/:id', function getAJob(req, res, next) {
 * @type {Array} ???
 */
 jobsRouter.get('/', function getAllJobs(req, res, next) {
-  Job.find()
-  .then(function sendBackAllTheJobs(allJobs) {
-    if (!Array.isArray(allJobs)) {
-      let err = new Error('Jobs is not an array');
-      err.status = 500;
-      return next(err);
-    }
-    res.json(allJobs.map(function(job) {
-      return {id: job.id, company: job.company, link: job.link};
-    }));
-  })
-  .catch(function handleIssues(err) {
-    console.error(err);
-    let ourError = new Error('Unable to retieve jobs');
-    ourError.status = 500;
-    return next(ourError);
-  });
+
+  if (Object.keys(req.query).length) {
+    Job.find({
+      company: {$regex: req.query.search, $options: 'i'}
+    })
+    .then(function sendBackMatchingJobs(data) {
+      console.log('hitting path?', req.query.search);
+      res.json(data);
+    })
+    .catch(function handleIssues(err) {
+      console.error(err);
+      let ourError = new Error('Error finding the job matching: ', req.query.search);
+      ourError.status = 422;
+      return next(ourError);
+    });
+  }
+  else {
+    Job.find()
+    .then(function sendBackAllTheJobs(allJobs) {
+      if (!Array.isArray(allJobs)) {
+        let err = new Error('Jobs is not an array');
+        err.status = 500;
+        return next(err);
+      }
+      res.json(allJobs.map(function(job) {
+        return {id: job.id, company: job.company, link: job.link};
+      }));
+    })
+    .catch(function handleIssues(err) {
+      console.error(err);
+      let ourError = new Error('Unable to retieve jobs');
+      ourError.status = 500;
+      return next(ourError);
+    });
+  }
 });
 
 /** Adds a job to the database
@@ -84,7 +91,7 @@ function addAJob(req, res, next) {
     return next(err);
   }
 
-  let theJobCreated = new Job({company: req.body.company, link: req.body.link, notes: req.body.notes, createTime: Date.now()});
+  let theJobCreated = new Job({company: req.body.company, link: req.body.link, notes: req.body.notes, createTime: new Date()});
 
   theJobCreated.save()
   .then(function sendBackTheResponse(data) {
