@@ -2,14 +2,13 @@ const jobsRouter = require('express').Router();
 const Job = require('../models/Job.model.js');
 
 /**
- * finds the job with the id matching the argument passed in req
- * @param  {Object}   req  the request object received from the frontend
- * @param  {Object}   res  the response object to return to the frontend
- * @param  {Function} next the middleware to proceed to next, if called
- * @return {Void}
- */
+* finds the job with the matching id
+* @param  {Object}   req  the request object received from the frontend
+* @param  {Object}   res  the response object to return to the frontend
+* @param  {Function} next the middleware to proceed to next, if called
+* @return {Void}
+*/
 jobsRouter.get('/:id', function getAJob(req, res, next) {
-  console.log('****************************************************************',req.params.id);
   Job.findById(req.params.id)
   .then(function sendBackTheJob(job) {
     if (!job) {
@@ -28,12 +27,13 @@ jobsRouter.get('/:id', function getAJob(req, res, next) {
 });
 
 /**
- * getAllJobs creates a response object that contains a JSON array of each job object containing company name, link, and notes.
- * @param  {Object}   req  the request object received from the frontend
- * @param  {Object}   res  the response object to return to the frontend
- * @param  {Function} next the middleware to proceed to next, if called
- * @return {Void}
- */
+* returns a JSON array of objects containing each job's company name, link, and notes.
+* OR, returns the jobs matching a query string, if provided.
+* @param  {Object}   req  the request object received from the frontend
+* @param  {Object}   res  the response object to return to the frontend
+* @param  {Function} next the middleware to proceed to next, if called
+* @return {Void}
+*/
 jobsRouter.get('/', function getAllJobs(req, res, next) {
   if (Object.keys(req.query).length) {
     Job.find({
@@ -71,7 +71,7 @@ jobsRouter.get('/', function getAllJobs(req, res, next) {
 });
 
 /** Adds a job to the database
-* @param {Object}     req  Must have a body like: {'company': String, 'link': String} may include notes
+* @param {Object}     req  body must contain: {'company': String, 'link': String} may include notes
 * @param {Object}     res  the response object to return to the frontend
 * @param {Function}   next the middleware to proceed to next, if called
 * @return {void}
@@ -96,12 +96,12 @@ jobsRouter.post('/', function addAJob(req, res, next) {
 });
 
 /**
- * finds the job with the id matching the argument passed in req
- * @param  {Object}   req  the request object received from the frontend
- * @param  {Object}   res  the response object to return to the frontend
- * @param  {Function} next the middleware to proceed to next, if called
- * @return {Void}
- */
+* finds the job with the id matching the argument passed in req
+* @param  {Object}   req  the request object received from the frontend
+* @param  {Object}   res  the response object to return to the frontend
+* @param  {Function} next the middleware to proceed to next, if called
+* @return {Void}
+*/
 jobsRouter.delete('/:id', function deleteAJob(req, res, next) {
   Job.findById({_id: req.params.id})
   .then(function removeTheJob(job) {
@@ -110,8 +110,7 @@ jobsRouter.delete('/:id', function deleteAJob(req, res, next) {
       err.status = 404;
       return next(err);
     }
-    job.remove(function deleteRecord(err, job) {
-    });
+    job.remove();
     res.json(job);
   })
   .catch(function handleIssues(err) {
