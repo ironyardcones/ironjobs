@@ -1,16 +1,6 @@
 const jobsRouter = require('express').Router();
 const Job = require('../models/Job.model.js');
 
-/**
-* [findMatchingJobs description]
-* @param  {[type]}   req  [description]
-* @param  {[type]}   res  [description]
-* @param  {Function} next [description]
-* @return {[type]}        [description]
-*/
-jobsRouter.get('/find', function findMatchingJobs(req, res, next) {
-
-});
 
 /**
 * getAJob finds a particular job in the database and assigns it to the response provided by the api
@@ -35,22 +25,25 @@ jobsRouter.get('/:id', function getAJob(req, res, next) {
 });
 
 /**
-* getAllJobs creates a response object that contains a JSON array of each job object containing company name, link, and notes.
-* @type {Array} ???
-*/
+ * getAllJobs creates a response object that contains a JSON array of each job object containing company name, link, and notes.
+ * @param  {Object}   req  the request object received from the frontend
+ * @param  {Object}   res  the response object to return to the frontend
+ * @param  {Function} next the middleware to proceed to next, if called
+ * @return {Void}
+ */
 jobsRouter.get('/', function getAllJobs(req, res, next) {
-
   if (Object.keys(req.query).length) {
+    // console.log("*****************", req.query.query);
     Job.find({
-      company: {$regex: req.query.search, $options: 'i'}
+      company: {$regex: req.query.query, $options: 'i'}
     })
     .then(function sendBackMatchingJobs(data) {
-      console.log('hitting path?', req.query.search);
+      console.log('hitting path?', req.query.query);
       res.json(data);
     })
     .catch(function handleIssues(err) {
       console.error(err);
-      let ourError = new Error('Error finding the job matching: ', req.query.search);
+      let ourError = new Error('Error finding the job matching: ', req.query.query);
       ourError.status = 422;
       return next(ourError);
     });
