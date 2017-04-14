@@ -10,14 +10,14 @@ const Job = require('../models/Job.model.js');
  */
 jobsRouter.get('/:id', function getAJob(req, res, next) {
   console.log('****************************************************************',req.params.id);
-  Job.findByID(req.params.id)
+  Job.findById(req.params.id)
   .then(function sendBackTheJob(job) {
     if (!job) {
       let err = new Error('job not found');
       err.status = 404;
       return next(err);
     }
-    res.json(job);
+    res.json({id: job._id, company: job.company, link: job.link, notes: job.notes, createTime: job.createTime});
   })
   .catch(function handleIssues(err) {
     console.error(err);
@@ -58,7 +58,7 @@ jobsRouter.get('/', function getAllJobs(req, res, next) {
         return next(err);
       }
       res.json(allJobs.map(function(job) {
-        return {id: job.id, company: job.company, link: job.link};
+        return {id: job._id, company: job.company, link: job.link};
       }));
     })
     .catch(function handleIssues(err) {
@@ -103,7 +103,7 @@ jobsRouter.post('/', function addAJob(req, res, next) {
  * @return {Void}
  */
 jobsRouter.delete('/:id', function deleteAJob(req, res, next) {
-  Job.findByID({_id: req.params.id})
+  Job.findById({_id: req.params.id})
   .then(function removeTheJob(job) {
     if (!job) {
       let err = new Error('job to delete not found');
@@ -111,7 +111,6 @@ jobsRouter.delete('/:id', function deleteAJob(req, res, next) {
       return next(err);
     }
     job.remove(function deleteRecord(err, job) {
-
     });
     res.json(job);
   })
